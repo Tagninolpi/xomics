@@ -7,7 +7,8 @@ requires-python = ">=3.13"
 dependencies = []
 
 [project.scripts]
-xomics-cp-dm = "xomics_cp_dm:main"
+gff_parse = "xomics_cp_dm.gff_parse:parse_gff"
+gff_opr = "xomics_cp_dm.gff_opr:gff_operation"
 
 [build-system]
 requires = ["uv_build>=0.9.9,<0.10.0"]

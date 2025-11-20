@@ -1,93 +1,218 @@
-# Xomics_cp_dm
+# Xomics
+
+## Objectifs:
+
+* Créer une librairie de manipulation d'annotations de genome
+* Choisir et documenter ses fonctionnalités
+* Rendre possible son installation dans d'autres projets
+
+## Méthodologie de travail
+Vous travaillerez en binome. Choisissez un nom pour votre projet (ex: *super_xomics*).
+
+Puis: 
+
+### Mise en place par le 1er binome
+**Via l'interface graphique du GitLab de la formation**
+1. Créer le repository sur le gitlab de la formation,
+exemple: `https://gitlab-pedago.univ-lyon1.fr:<MON_LOGIN>/super_xomics`
+2. Depuis l'interface GitLab du repository, ajouter le 2eme  binome à la liste des "Maintainer" du repository
+3. Communiquer le chemin ssh vers ce repository au 2eme binome, exemple: `git@gitlab-pedago.univ-lyon1.fr:<MON_LOGIN>/super_xomics.git`
+
+### Mise en place par le 2eme binome
+**Via le terminal SHELL sur votre machine**
+1. Créer un projet uv du **même nom que le projet du 1er binome** (ex: `uv init --package super_xomics`)
+2. Initialiser un repository git local à l'intérieur de ce projet
+
+```sh
+cd super_xomics
+git init
+```
+
+Il ne vous reste plus qu'à synchroniser les repository local et distant, comme [lors du TP uv](http://pages-pedago.univ-lyon1.fr/poo/tp-packaging/#tester-linstallation-de-votre-package) précédent.
+
+### Philosophie de développement
+
+> A lire après avoir pris connaissance du contenu du projet
+
+Le travail qui vous est demandé va nécessiter de réfléchir et d'implémenter des fonctionnalités indépendamment pour chaque membre de votre binome. Afin d'éviter qu'un binome doive *attendre* la production de l'autre pour avancer, vous tavaillerez sur deux branches qui **divergeront à partir d'un commit commun**.
+
+#### 1. Sur la branche `main`: créer un modèle de classe(s) minimal (qui consituera le commit commun).
+
+Dans ce commit commun, chaque binome peut également définir (dans le `pyproject.toml`) un script applicatif personnel, exemple:
+
+```toml
+[project.scripts]
+gtf_parser_devel = "super_xomics:gtf:main"
+collection_devel = "super_xomics:collection:main"
+```
+
+#### 2. Depuis ce commit commun: créer un branche pour chaque binome.
+
+  * Branche consacrée au parsing et aux fonctionnalités des **objets**
+  * Branche consacrée aux fonctionnalités des **collections** (voir plus bas).
 
 
 
-## Getting started
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+**Important**: Le développement dans la **branche collection** peut s'appuyer sur une liste d'objet `Gene`, `Transcrit` et `Exon` arbitrairement déclarés (donc sans requérir  un parsing du gff) dans le script de développement.
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+Par exemple, `super_xomics:collection:main` pourrait contenir
+```python
+from .annotation import Gene, Transcrit # Classes minimales
+                                        # suffisantes pour 
+                                        # travailler à la "collection" 
+                                          
+g1= Gene("gene1", "chr10", 10, 200, ....) # Valeurs de paramètre
+t1= Transcrit(...)                        # arbitraires
+t2= Transcrit(...)
 
-## Add your files
+a = Annotation([g1, t1, t2])
+# Travailler uniquement au développement de Annotation
+```
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/topics/git/add_files/#add-files-to-a-git-repository) or push an existing Git repository with the following command:
+### Fichier de documentation
+A différents stades de développement, il sera primordial de bien décrire (à l'aide d'exemples) les fonctions que vous souhaitez rendre publiques (utilisables par d'autres), en éditant le fichier `README.md`. 
+On utilise le language [markdown](https://www.markdownguide.org/basic-syntax/) pour écrire cette documentation en proposant notamment des lignes d'exemples, à l'aide de [*codes-fences*](https://www.markdownguide.org/basic-syntax/#code).
+
+## Le Projet
+
+### le fichier GFF
+
+Le format de fichier GFF, similaire au format GTF, est un format de fichier utilisé pour représenter des annotations de génomes. Il contient tous les gènes annotés avec leurs positions et différentes informations connues à leurs sujet.
+En plus des gènes, ces fichiers contiennent également d'autres "features" comme par exemple les différents transcrits connus d'un gène ainsi que les différents exons qui les composent.
+Les fichiers `data/Human_sample1.gff` et `data/Human_sample2.gff` contiennent l'annotation des quelques gènes du génome humain hg38 ainsi que quelques uns de leurs transcrits.
+Pour simplifier les choses, seul 3 types de "features" sont représentées dans ce fichier:  "gene", "mRNA" et "exon". Dans de vrai fichiers d'annotations il peut y avoir beaucoup plus de features différents (CDS, codon, lncRNA, UTR...).
+Le fichier est sous format tabulé et organisé sous forme arborescente qui représente l'appartenance : un "exon" appartient à un "mRNA" qui lui même appartient à un "gene".
+Ainsi, toutes les lignes qui suivent une ligne "gene" correspondent à des features qui appartiennent à ce gene, et ce,  jusqu'à la prochaine ligne "gene". De même toutes les lignes "exon" qui suivent une ligne "mRNA" sont des exons qui appartiennent à ce transcrit.
+On peut résumer les choses de la manière suivante :
 
 ```
-cd existing_repo
-git remote add origin https://gitlab-pedago.univ-lyon1.fr/cpalandre/xomics_cp_dm.git
-git branch -M main
-git push -uf origin main
+Ligne "gene" du gène 1
+Ligne "mRNA" du transcrit 1 du gène 1
+Ligne "exon" de l'exon 1 du transcrit 1 du gène 1
+Ligne "exon" de l'exon 2 du transcrit 1 du gène 1
+Ligne "exon" de l'exon 3 du transcrit 1 du gène 1
+Ligne "exon" de l'exon 4 du transcrit 1 du gène 1
+...
+Ligne "mRNA" du transcrit 2 du gène 1
+Ligne "exon" de l'exon 1 du transcrit 2 du gène 1
+Ligne "exon" de l'exon 2 du transcrit 2 du gène 1
+Ligne "exon" de l'exon 3 du transcrit 2 du gène 1
+...
+
+Ligne "gene" du gène 2
+Ligne "mRNA" du transcrit 1 du gène 2
+Ligne "exon" de l'exon 1 du transcrit 1 du gène 2
+Ligne "exon" de l'exon 2 du transcrit 1 du gène 2
+Ligne "exon" de l'exon 3 du transcrit 1 du gène 1
+...
+Ligne "mRNA" du transcrit 2 du gène 2
+Ligne "exon" de l'exon 1 du transcrit 2 du gène 2
+Ligne "exon" de l'exon 2 du transcrit 2 du gène 2
+Ligne "exon" de l'exon 3 du transcrit 2 du gène 2
+...
+
 ```
 
-## Integrate with your tools
 
-- [ ] [Set up project integrations](https://gitlab-pedago.univ-lyon1.fr/cpalandre/xomics_cp_dm/-/settings/integrations)
+Pour les significations des différentes colonnes, elles sont similaires à celles du format GTF. La spécification exacte se trouve [ici](https://github.com/The-Sequence-Ontology/Specifications/blob/master/gff3.md).
+Comme pour le format GTF, chaque ligne est découpée en 9 colonnes, les huits première étant bien spécifiées et la dernière étant une colonne "attributs" dans laquelle plusieurs informations peuvent être renseignées.
 
-## Collaborate with your team
+## Modèle de classe
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/user/project/merge_requests/auto_merge/)
+Notre objectif sera de proposer une implémentation des classes `Gene`, `Transcrit` et `Exon` représentant respectivement des gènes, des transcrits et des exons. Ces objets auront vocation à être créée à partir d'un fichier GFF tels que ceux présents dans le répertoire `data`. Autrement dit les informations que nous aurons sous la main pour créer des objets Gene, Transcrit et Exon seront celles présentes dans le fichier GFF. 
+Le code implémentant ces classes sera écrit dans le module `annotation[.py]`.
+Un fichier contenant les informations d'un unique gène  vous est fourni sous `data/ADGRB2.gff`.
+Une fois ces classes écrites, il vous faudra écrire classe `Annotation` qui représente un ensemble de gènes tel que le représente un fichier GFF.
 
-## Test and Deploy
+### Détail des classes `Gene`, `Transcrit` et `Exon`
 
-Use the built-in continuous integration in GitLab.
+Le choix des différents attributs et méthodes que vous utiliserez dans vos classes est libre mais quelques spécifications vous sont imposées.
+* À partir d'un objet de type `Gene`, il faudra que l'utilisateur puisse avoir accès à tous les objets de type `Transcrit` qui correspondent aux transcrits de ce gène. 
+* De même, à partir d'un objet de type `Transcrit`, il faudra que l'utilisateur puisse avoir accès à tous les objets de type `Exon` qui correspondent aux exons de ce transcrit. 
+* À partir d'un objet de type `Gene`, il faudra que l'utilisateur puisse avoir accès à son nom et à son identifiant (le `GeneID` présent dans la section `Dbxref`).
+* Les objets de type `Transcrit` devront connaître leur identifiant (le champs `transcript_id`).
+* À partir d'un objet de type `Transcrit`, il faudra que l'utilisateur puisse avoir accès à l'identifiant du gène auquel il appartient.
+* De même à partir d'un objet de type `Exon`, il faudra que l'utilisateur puisse avoir accès à l'identifiant du transcrit et du gène auquel il appartient.
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+## Méthodes
 
-***
+### Égalité de transcrits
 
-# Editing this README
+Lorqu'on écrit une classe, python nous laisse la possibilité de redéfinir les opérations usuelles sur les objet de cette classe telle que l'addition, la soustraction, ou encore les tests d'égalité ou de comparaisons.
+Pour cela on doit définir ce que signifie ces opérations dans le contexte de la classe qu'on est en train d'écrire. Par exemple si on souhaite pouvoir tester l'égalité entre deux objets de la façon suivante :
+```python
+if objet1 == objet2:
+    ...
+```
+il faut implémenter la méthode `__eq__` dans la classe. Cette méthode doit prendre `self` en paramètre ainsi qu'un autre objet de même type (celui avec lequel on veut tester l'égalité de notre objet `self`) et renvoyer un  booléen.
+C'est alors cette méthode qui sera automatiquement appelée lorsqu'on teste l'égalité entre les deux objets.
+* Implémentez la méthode `__eq__` de la classe `Transcit` pour que deux objets `Transcrit` soit considérés égaux s'ils ont le même "transcript_id" et le même "GeneID".
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+### Fusion de gènes
 
-## Suggestions for a good README
+Étant donnés deux objets de type `Gene` représentant le même gène mais issus d'annotations différentes, on souhaiterait pouvoir créer un nouvel objet de type `Gene` correspondant à la fusion des deux objets initiaux.
+On se placera ici dans un cas simple où on considère que les deux objets ne diffèreront que par leur liste de transcrits. Autrement dit étant donnés deux objet de type `Gene` représentant le même gène on souhaiterait en créer un nouveau dont la liste des transcrits correspond à l'union des deux ensembles de transcrits des deux objets `Gene`.
+Pour savoir si un transcrit d'un des objets est présent dans l'autre, on ne regardera que l'identifiant du transcrit (pas besoin d'aller vérifier la liste des exons). On pourra donc utiliser le test d'égalité entre les transcrits comme implémenté précédemment.
+Pour fusionner les deux gènes nous alons utiliser le symbole "+" de l'addition, on pourra donc écrire:
+```python
+gene_fusionné = gene1 + gene2
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+```
+Pour pouvoir définir l'addition entre deux objets d'une même classe, il faut implémenter la méthode `__add__` dans la classe. Cette méthode prend en paramètre `self` et un autre objet de même type et retourne un nouvel objet de la classe.
 
-## Name
-Choose a self-explaining name for your project.
+* Implémentez la méthode `__add__` pour la classe gène qui lèvera une exeptions si les deux gènes (self et l'autre) n'ont pas le même "GeneID" et retournera un nouvel objet `Gene` qui contiendra les transcrits présents dans les deux gènes initiaux.
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+## Classe Annotation
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+Implémentez maintenant une classe `Annotation` qui représentera une collection de gène telle que celle présente dans un fichier GFF.
+Le constructeur de la classe devra prendre un fichier GFF et créer tous les objets `Gene`, `Transcit` et `Exon` correspondant. 
+À partir d'un objet annotation, l'utilisateur devra être capable d'avoir accès aux gènes présents à l'intérieur.
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+### Fusion d'annotation
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+Implémentez la méthode `__add__` de la classe annotation pour que l'on puisse fusionner deux annotations en utilisant le symbole "+" de l'addition. Dans la fusion des annotations, si un gène n'apparait que dans une seule des deux annotations alors il sera présent tel quel dans l'annotation résultat, sinon le gène présent dans la fusion sera la fusion des deux gènes telle que définie précédemment avec la méthode `__add__` de la classe `Gene`.
+Vous pouvez tester votre méthode avec les deux fichier `data/Human_sample1.gff` et  `data/Human_sample2.gff`.
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+### Méthode get_gene
+Implémentez une méthode `get_gene` qui, étant donné un GeneID passé en paramètre sous forme de chaîne de caractères, retourne l'objet `Gene` de l'annotation qui correspond à cet identifiant et lève une exception si aucun gène ne possède cet identifiant dans l'annotation.
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+### Exporter en gff
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+Écrire une méthode `to_gff` qui prend un chemin de fichier en paramètre et écrit sous format GFF le contenu de l'objet annotation 
+Astuce : Vous pouvez enregistrer dans les objets `Gene`, `Transcrit` et `Exon` leur ligne de fichier GFF à partir desquelles ils ont été créés.
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+## Visualisation de données
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+On souhaite visualiser la distribution des longueurs des transcrits pour des gènes. Étant donné un transcrit, sa longueur sera la somme de la longueur des exons qui le compose. 
+On souhaite dessiner un boxplot (boite à moustache) ayant une boite par gène, et la boite d'un gène sera définie par les longueurs des différents transcrits de ce gène. 
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+Vous dessinerez ce boxplot grâce à la librarie matplotlib (à installer) en vous basant sur l'exemple suivant.
+### 
 
-## License
-For open source projects, say how it is licensed.
+```python
+from matplotlib import figure
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+fig = figure.Figure()
+ax   = fig.subplots(1, 1)
+RNAlens = [
+            [300, 1558, 845, 130, 200 ], # longueur des transcrits du gène 1 
+            [400, 650, 768],  # longueur des transcrits du gène 2 
+            [658, 825, 1154, 478] # longueur des transcrits du gène 3 
+            ]
+nom_des_genes = ["gene1", "gene2", "gene3"]
+ax.boxplot(RNAlegnth, tick_labels=nom_des_genes)
+fig.savefig("test.png")
+```
+
+* Écrire la méthode `rna_lens` dans la classe `Annotation` qui prendra un nom de fichier en paramètre et qui sauvegardera le boxplot dans le fichier des longueurs des transcrits pour tous les gène de l'annotation dans ce fichier.
+
+## Rendre publique votre librairie
+
+Lorsque les fonctionnalités demandées ont été implémentées dans votre libraire et que sa **documentation vous donne satisfaction**:
+
+* Réaliser un `git push`
+* Valider son installation dans un ["projet de paille"](http://pages-pedago.univ-lyon1.fr/poo/tp-packaging/#tester-linstallation-de-votre-package)
+* Communiquer l'url de votre projet aux encadrants
+* GG
