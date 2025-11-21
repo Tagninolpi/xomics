@@ -1,5 +1,10 @@
-
 class Exon:
-    def __init__(self,gene_id:int,transcrit_id:int):
-        self.gene_id = gene_id
-        self.transcrit_id = transcrit_id
+    def __init__(self,id:str,start:int,end:int,strand:str,gene_ids:dict,transcrit_ids:dict):
+        self.id = id
+        self.start = start
+        self.end = end
+        self.strand = strand
+        
+        self.gene_ids = gene_ids
+        self.transcrit_ids = transcrit_ids
+        
