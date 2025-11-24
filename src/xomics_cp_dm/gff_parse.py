@@ -6,7 +6,10 @@
 from .gene_class import Gene
 from .transcrit_class import Transcrit
 from .exon_class import Exon
+from .annotation_class import Annotation
+import argparse
 
+## On découpe la colonne 9 avec ‘;’, on nettoie chaque morceau, on regarde si c’est du format ‘clé=valeur’ ou ‘clé valeur’, puis on met chaque paire clé/valeur dans un dictionnaire.
 def parse_attributes(attr_str):
     attrs = {}
     for item in attr_str.split(";"):
@@ -27,8 +30,8 @@ def parse_attributes(attr_str):
 
     return attrs
 
-
-def parse_gff(gff_path):
+## Pour chaque ligne utile du GFF, on extrait les attributs, on crée un Gene quand le feature est gene, un Transcrit quand c’est mRNA, un Exon quand c’est exon, puis on attache chaque transcrit à son gène et chaque exon à son transcrit jusqu’à renvoyer la liste finale des gènes avec toute leur structure.
+def parse_gff(gff_path: str):
     genes = []
     current_gene = None
     current_transcrit = None
@@ -85,7 +88,7 @@ def parse_gff(gff_path):
             if feature == "exon":
                 exon_id = attrs.get("ID", f"exon_{start}_{end}")
                 parent_transcrit = attrs.get("Parent")
-                parent_gene = current_gene.id  # toujours associé au gene courant
+                parent_gene = current_gene.id
 
                 exon = Exon(
                     id=exon_id,
@@ -101,3 +104,31 @@ def parse_gff(gff_path):
 
     return genes
  
+## Le main() lit l’argument gff_path, parse le fichier grâce à parse_gff, transforme la liste de gènes en une Annotation, puis affiche le nombre total de gènes ainsi que la structure gène → transcrit → exons pour inspection.
+def main():
+    parser = argparse.ArgumentParser(
+        prog="gff_parse",
+        description="Parse un fichier GFF et affiche son contenu."
+    )
+
+    parser.add_argument(
+        "gff_path",
+        help="Chemin vers le fichier GFF à parser"
+    )
+
+    args = parser.parse_args()
+
+    genes = parse_gff(args.gff_path)
+
+    annotations=[]
+    annotations.append(Annotation(genes))
+
+    print(f"Nombre de gènes trouvés : {len(genes)}")
+
+    for g in genes:
+        print(f"\nGène : {g.id} ({g.name}) [{g.start}-{g.end}]")
+        print(f"  -> {len(g.transcrit_list)} transcrits")
+
+        for t in g.transcrit_list:
+            print(f"      Transcrit : {t.id} ({t.name}) [{t.start}-{t.end}]")
+            print(f"         -> {len(t.exon_list)} exons")
