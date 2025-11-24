@@ -11,6 +11,7 @@ class Transcrit:
         
         self.gene_id = gene_id
 
+<<<<<<< HEAD
     def __eq__(self, transcrit_2):
         return transcrit_2.id == self.id and self.gene_id == transcrit_2.gene_id 
     
@@ -22,3 +23,6 @@ class Transcrit:
         msg = f"id:{self.id} name:{self.name} start:{self.start} end:{self.end} strand:{self.strand} gene_id:{self.gene_id}"
         msg += f"\nexon list:{self.exon_list}"
         return msg
+=======
+    
+>>>>>>> b92b6c71dbdec54f511e5c14d45da86de6211615

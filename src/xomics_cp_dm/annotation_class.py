@@ -5,6 +5,7 @@ from .exon_class import Exon
 class Annotation:
     def __init__(self,genes_list):
         self.gene_list:list[Gene[Transcrit[Exon]]] = genes_list
+<<<<<<< HEAD
 
     def __add__(self,annot2):
         new_genes = []
@@ -25,3 +26,6 @@ class Annotation:
     
     def __repr__(self):
         return self.gene_list
+=======
+        
+>>>>>>> b92b6c71dbdec54f511e5c14d45da86de6211615
