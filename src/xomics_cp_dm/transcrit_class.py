@@ -1,6 +1,6 @@
 from .exon_class import Exon
 class Transcrit:
-    def __init__(self,id:str,name:str,start:int,end:int,strand:str,gene_ids:int):
+    def __init__(self,id:str,name:str,start:int,end:int,strand:str,gene_id:str):
         self.id = id
         self.name = name
         self.start = start
@@ -9,4 +9,6 @@ class Transcrit:
         
         self.exon_list:list[Exon] = []
         
-        self.gene_ids = gene_ids
+        self.gene_id = gene_id
+
+    
