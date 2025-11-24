@@ -4,10 +4,10 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
-dependencies = []
+dependencies = ["matplotlib"]
 
 [project.scripts]
-gff_parse = "xomics_cp_dm.gff_parse:main"
+gff_parse = "xomics_cp_dm.gff_parse:parse_gff"
 gff_opr = "xomics_cp_dm.gff_opr:gff_operation"
 
 [build-system]
