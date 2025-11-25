@@ -1,6 +1,6 @@
 [project]
 name = "xomics-cp-dm"
-version = "0.1.0"
+version = "0.1.2"
 description = "xomics_cp_dm is a Python library for reading, manipulating, and exporting genomic annotations in GFF format. It provides a clear object-oriented model (Gene → Transcript → Exon) and an Annotation class for performing advanced operations on gene collections."
 readme = "README.md"
 authors = [{name = "Meral Duzgun", email = "duzguncan.meral@etu.univ-lyon1.fr"},
