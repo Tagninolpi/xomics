@@ -28,9 +28,6 @@ class Gene:
         msg +=f"\ntranscrit list:{self.transcrit_list}"
         return msg
 
-    #Implémentez la méthode __add__ pour la classe gène qui lèvera une exeptions si 
-    #les deux gènes (self et l'autre) n'ont pas le même "GeneID" et retournera un 
-    #nouvel objet Gene qui contiendra les transcrits présents dans les deux gènes initiaux.
 
 
 

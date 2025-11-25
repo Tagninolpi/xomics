@@ -1,14 +1,18 @@
 [project]
 name = "xomics-cp-dm"
 version = "0.1.0"
-description = "Add your description here"
+description = "xomics_cp_dm is a Python library for reading, manipulating, and exporting genomic annotations in GFF format. It provides a clear object-oriented model (Gene → Transcript → Exon) and an Annotation class for performing advanced operations on gene collections."
 readme = "README.md"
+authors = [{name = "Meral Duzgun", email = "duzguncan.meral@etu.univ-lyon1.fr"},
+  {name = "Palandre Colin", email = "colin.palandre@etu.univ-lyon1.fr"}]
 requires-python = ">=3.13"
-dependencies = ["matplotlib"]
+keywords = ["bioinformatics", "GFF", "genomics"]
+dependencies = [
+    "matplotlib>=3.10.7",
+]
 
 [project.scripts]
-gff_parse = "xomics_cp_dm.gff_parse:parse_gff"
-gff_opr = "xomics_cp_dm.gff_opr:gff_operation"
+xomics_test = "xomics_cp_dm.gff_parse:main"
 
 [build-system]
 requires = ["uv_build>=0.9.9,<0.10.0"]
